@@ -45,7 +45,7 @@ public abstract class AbstractCache<T> {
             if(cache.containsKey(key)) {
                 // 资源在缓存中，直接返回
                 T obj = cache.get(key);
-                references.put(key, references.get(key) + 1);
+                references.put(key, references.get(key) + 1);// 引用计数加1
                 lock.unlock();
                 return obj;
             }
@@ -61,6 +61,7 @@ public abstract class AbstractCache<T> {
             break;
         }
 
+        //尝试获取资源，并加入缓存
         T obj = null;
         try {
             obj = getForCache(key);
@@ -73,9 +74,9 @@ public abstract class AbstractCache<T> {
         }
 
         lock.lock();
-        getting.remove(key);
-        cache.put(key, obj);
-        references.put(key, 1);
+        getting.remove(key);//取消使用标记
+        cache.put(key, obj);//将资源加入缓存
+        references.put(key, 1);//将引用计数设置为1
         lock.unlock();
         
         return obj;
@@ -87,12 +88,12 @@ public abstract class AbstractCache<T> {
     protected void release(long key) {
         lock.lock();
         try {
-            int ref = references.get(key)-1;
+            int ref = references.get(key)-1;//获取资源的引用数并-1
             if(ref == 0) {
-                T obj = cache.get(key);
-                releaseForCache(obj);
-                references.remove(key);
-                cache.remove(key);
+                T obj = cache.get(key);//从缓存中获取资源
+                releaseForCache(obj);//释放资源
+                references.remove(key);//移除引用计数
+                cache.remove(key);//从缓存中移除资源
                 count --;
             } else {
                 references.put(key, ref);
@@ -108,12 +109,12 @@ public abstract class AbstractCache<T> {
     protected void close() {
         lock.lock();
         try {
-            Set<Long> keys = cache.keySet();
+            Set<Long> keys = cache.keySet();//获取缓存中所有资源的key
             for (long key : keys) {
-                T obj = cache.get(key);
-                releaseForCache(obj);
-                references.remove(key);
-                cache.remove(key);
+                T obj = cache.get(key);//从缓存中获取
+                releaseForCache(obj);//释放缓存中这个资源
+                references.remove(key);//移除引用计数
+                cache.remove(key);//移除缓存
             }
         } finally {
             lock.unlock();

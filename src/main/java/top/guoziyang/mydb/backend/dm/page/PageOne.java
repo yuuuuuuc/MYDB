@@ -29,7 +29,9 @@ public class PageOne {
     private static void setVcOpen(byte[] raw) {
         System.arraycopy(RandomUtil.randomBytes(LEN_VC), 0, raw, OF_VC, LEN_VC);
     }
+    //raw是一个byte数组
 
+    //关闭数据库，将100~107字节处的随机字节拷贝到108~115字节
     public static void setVcClose(Page pg) {
         pg.setDirty(true);
         setVcClose(pg.getData());
@@ -39,6 +41,7 @@ public class PageOne {
         System.arraycopy(raw, OF_VC, raw, OF_VC+LEN_VC, LEN_VC);
     }
 
+    //打开时检查数据库是否正常关闭
     public static boolean checkVc(Page pg) {
         return checkVc(pg.getData());
     }

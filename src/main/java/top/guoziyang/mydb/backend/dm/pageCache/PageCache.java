@@ -11,7 +11,7 @@ import top.guoziyang.mydb.common.Error;
 //页面缓存的接口
 public interface PageCache {
     
-    public static final int PAGE_SIZE = 1 << 13;
+    public static final int PAGE_SIZE = 1 << 13;//被定义为8192，页面大小
 
     int newPage(byte[] initData);
     Page getPage(int pgno) throws Exception;

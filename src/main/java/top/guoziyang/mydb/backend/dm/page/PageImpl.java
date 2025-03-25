@@ -4,7 +4,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import top.guoziyang.mydb.backend.dm.pageCache.PageCache;
-
+//页面结构 定义
 public class PageImpl implements Page {
     private int pageNumber;
     private byte[] data;
@@ -19,7 +19,7 @@ public class PageImpl implements Page {
         this.pc = pc;
         lock = new ReentrantLock();
     }
-
+//构造方法
     public void lock() {
         lock.lock();
     }

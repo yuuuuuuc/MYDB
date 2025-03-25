@@ -41,7 +41,7 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache {
         this.fileLock = new ReentrantLock();
         this.pageNumbers = new AtomicInteger((int)length / PAGE_SIZE);
     }
-
+//新建页面时，页面缓存会自增页面数量，并在写入文件系统后返回新建页面的页号
     public int newPage(byte[] initData) {
         int pgno = pageNumbers.incrementAndGet();
         Page pg = new PageImpl(pgno, initData, null);
@@ -58,28 +58,31 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache {
      */
     @Override
     protected Page getForCache(long key) throws Exception {
-        int pgno = (int)key;
-        long offset = PageCacheImpl.pageOffset(pgno);
+        int pgno = (int)key;//页号
+        long offset = PageCacheImpl.pageOffset(pgno);//计算页的磁盘偏移量
 
-        ByteBuffer buf = ByteBuffer.allocate(PAGE_SIZE);
-        fileLock.lock();
+        ByteBuffer buf = ByteBuffer.allocate(PAGE_SIZE);//NIO，分配与页大小一致的缓存区
+        fileLock.lock();//获取文件锁
         try {
-            fc.position(offset);
-            fc.read(buf);
-        } catch(IOException e) {
+            fc.position(offset);//定位到指定偏移位
+            fc.read(buf);//读取数据
+        } catch(IOException e) {//
             Panic.panic(e);
         }
         fileLock.unlock();
         return new PageImpl(pgno, buf.array(), this);
     }
 
+    //当页面不需要在缓存中保留，就会调用这个方法
     @Override
     protected void releaseForCache(Page pg) {
+
         if(pg.isDirty()) {
             flush(pg);
             pg.setDirty(false);
         }
     }
+
 
     public void release(Page page) {
         release((long)page.getPageNumber());
@@ -93,12 +96,12 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache {
         int pgno = pg.getPageNumber();
         long offset = pageOffset(pgno);
 
-        fileLock.lock();
+        fileLock.lock();//获取排他锁
         try {
             ByteBuffer buf = ByteBuffer.wrap(pg.getData());
-            fc.position(offset);
-            fc.write(buf);
-            fc.force(false);
+            fc.position(offset);//定位到指定偏移位
+            fc.write(buf);//写入数据
+            fc.force(false);//强制刷盘
         } catch(IOException e) {
             Panic.panic(e);
         } finally {

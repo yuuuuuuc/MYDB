@@ -8,19 +8,19 @@ import java.nio.channels.FileChannel;
 import top.guoziyang.mydb.backend.dm.page.Page;
 import top.guoziyang.mydb.backend.utils.Panic;
 import top.guoziyang.mydb.common.Error;
-
+//页面缓存的接口
 public interface PageCache {
     
     public static final int PAGE_SIZE = 1 << 13;
 
     int newPage(byte[] initData);
     Page getPage(int pgno) throws Exception;
-    void close();
-    void release(Page page);
+    void close();//关闭页面
+    void release(Page page);//释放页面
 
-    void truncateByBgno(int maxPgno);
-    int getPageNumber();
-    void flushPage(Page pg);
+    void truncateByBgno(int maxPgno);//根据最大页号截断页面
+    int getPageNumber();//获取当前页面数量
+    void flushPage(Page pg);//刷新页面
 
     public static PageCacheImpl create(String path, long memory) {
         File f = new File(path+PageCacheImpl.DB_SUFFIX);

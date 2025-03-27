@@ -14,8 +14,10 @@ import top.guoziyang.mydb.common.Error;
 public interface Logger {
     void log(byte[] data);
     void truncate(long x) throws Exception;
+    //用于将日志文件进行截断
     byte[] next();
     void rewind();
+    //将日志读取文件指针重置到文件头
     void close();
 
     public static Logger create(String path) {
